@@ -1,239 +1,116 @@
 ---
 title: API Reference
 
-language_tabs: # must be one of https://git.io/vQNgJ
-  - shell
-  - ruby
-  - python
-  - javascript
+language_tabs:
+  - shell: cURL
 
 toc_footers:
   - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='https://github.com/lord/slate'>Documentation Powered by Slate</a>
+  - <a href='https://cannactrl.com'></a>
 
-includes:
-  - errors
+<!-- includes: -->
+  <!-- - errors -->
 
 search: true
 ---
 
-# Introduction
+# Intro
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+Welcome to the CannaCtrl API! You can use our API to access Dispensary API endpoints, which can get information on various menu items, store information, and real time inventory in our database.
 
-We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+All requests are made using HTTP requests. You can view code examples in the dark area to the right.
 
-This example API documentation page was created with [Slate](https://github.com/lord/slate). Feel free to edit it and use it as a base for your own API's documentation.
 
 # Authentication
 
-> To authorize, use this code:
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
+> username and password must be included in every request
 
 ```shell
-# With shell, you can just pass the correct header with each request
-curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
+curl "https://us-central1-cannactrl-menu.cloudfunctions.net/menu"
+  -H "Content-Type: application/json"
+  -X POST {"username": 'myUserName', "password": 'myPassword'}
 ```
 
-```javascript
-const kittn = require('kittn');
+> Make sure to replace `myUserName` and `myPassword` with the credentials we provide.
 
-let api = kittn.authorize('meowmeowmeow');
-```
+CannCtrl uses username and password to allow access to the API. You can register a new CannaCtrl API credentials by emailing info@CannaCtrl.com
 
-> Make sure to replace `meowmeowmeow` with your API key.
+CannCtrl expects for the username and password to be included in all API requests to the server in the body that looks like the following:
 
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
+`username: myUserName`,
+`password: myPassword`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+You must replace <code>myUserName</code> & <code>myPassword</code> with your credentials.
 </aside>
 
-# Kittens
+You must obtain an API token from the collectives you choose to request information from
 
-## Get All Kittens
+# Menu Items
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
+## Get All Menu Items
 
 ```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
+curl "https://us-central1-cannactrl-menu.cloudfunctions.net/menu"
+  -X POST { "collective_token": 'collective_token', "username": 'myUserName', "password": 'myPassword'}
 ```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
-```
-
+> Make sure to obtain a `collective_token` from each dispensary
 > The above command returns JSON structured like this:
 
 ```json
 [
   {
     "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
+    "name": "Brownie Bites",
+    "brand_name": "Milf 'n Cookies",
+    "product_type": "Edible",
+    "product_subtype": "Brownies",
+    "description": "Spoil yourself with this sinful blend of silky, rich chocolate.",
+    "product_prices" : [{"unit": "unit", "amount": 1, "price": 10.00}]
   },
   {
     "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
+    "name": "Purple Punch",
+    "brand_name": "Jungle Boys",
+    "product_type": "Flower",
+    "product_subtype": "Indica",
+    "description": "Spoil yourself with this sinful blend of silky, rich chocolate.",
+    "product_prices" : [
+        {"unit": "gram", "amount": 1, "price": 10.00},
+        {"unit": "ounce", "amount": 0.125, "price": 50.00},
+        {"unit": "ounce", "amount": 0.5, "price": 100.00},
+        {"unit": "ounce", "amount": 1, "price": 180.00}
+        ]
   }
 ]
 ```
 
-This endpoint retrieves all kittens.
+This endpoint retrieves all Menu Items.
 
 ### HTTP Request
 
-`GET http://example.com/api/kittens`
+`POST https://us-central1-cannactrl-menu.cloudfunctions.net/menu`
 
 ### Query Parameters
 
-Parameter | Default | Description
+Parameter | Type | Description
 --------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
+collective_token | String | Must be obtained from each dispensary.
+active | Bool | Automatically set to true, the result only includes active menu items
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
+### Response
 
-## Get a Specific Kitten
+Parameter | Type | Description
+--------- | ------- | -----------
+product_type | String | Flower, Edible, Concentrate, Tincture, Drink, Wax, Preroll, Gear
+product_subtype | String | i.e. Indica, Sativa, Hybrid, Brownies, Indica Hybrid (Indica dominant hybrid)
+active | Bool | Default set to true, the result will only include active menu items
+product_prices | [Array] | An array of Prices. See Product Prices Schema below
 
-```ruby
-require 'kittn'
+### Product Prices
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
-}
-```
-
-This endpoint retrieves a specific kitten.
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
-
-### HTTP Request
-
-`GET http://example.com/kittens/<ID>`
-
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
-
-## Delete a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2"
-  -X DELETE
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "deleted" : ":("
-}
-```
-
-This endpoint deletes a specific kitten.
-
-### HTTP Request
-
-`DELETE http://example.com/kittens/<ID>`
-
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
-
+Parameter | Type | Description
+--------- | ------- | -----------
+unit | String | gram, ounce, or unit(each)
+amount | Number | quantity of the units (i.e. 0.125 ounce = 1/8)
+price | Number | price of product
